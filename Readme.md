@@ -1,7 +1,7 @@
 # Личный проект «TaskForce»
 
 * Студент: [Арсений Спирин](https://up.htmlacademy.ru/yii/1/user/866299).
-* Наставник: `Неизвестно`.
+* Наставник: [Сергей Шершнев](https://htmlacademy.ru/profile/shv_sergey)..
 
 ---
 

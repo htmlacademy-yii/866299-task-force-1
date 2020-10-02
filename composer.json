@@ -1,5 +1,6 @@
 {
     "name": "loktak/taskforce",
+    "description": "project",
     "require": {},
     "autoload": {
         "psr-4": {

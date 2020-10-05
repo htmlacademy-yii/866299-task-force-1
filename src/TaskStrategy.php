@@ -1,7 +1,11 @@
 <?php
-
+declare(strict_types = 1);
 namespace taskforce;
 
+/**
+ * Класс TaskStrategy
+ * @package taskforce
+ */
 class TaskStrategy 
 {
     // Статусы задачи
@@ -28,22 +32,30 @@ class TaskStrategy
     private $contractorID;
     private $clientId;
     private $userID;
+
     /**
-     * Q: Вопрос если у нас активна сессия и юзер id нам всегда известен, нужно ли его сюда передавать? 
-     * Т.Е я понимаю, что классы как и функции работают по принципу, что передал с тем и работают.
-     * Так что мне либо нужно передать сюда id user'a либо как-то получить его внутри класса
-     * Теоретически я могу создать класс, который будет всю инфу о юзере получать и использовать этот класс в этом классе?
+     * Конструктор класса
+     * 
+     * @param string $currentStatus текущий статус задания
+     * @param int $contractorID id исполнителя
+     * @param int $clientId id заказчика
+     * @param int $userID id текущего юзера
+     * 
      */
 
-    //Конструктор класса
-
-    public function __construct($currentStatus, $contractorID, $clientId, $userID)
+    public function __construct(string $currentStatus, int $contractorID, int $clientId, int $userID)
     {
         $this->currentStatus = $currentStatus;
         $this->contractorID = $contractorID;
         $this->clientId = $clientId;
         $this->userID = $userID;
     }
+
+    /**
+     * Q: Что делать с contractorID? 
+     * Дело в том, что при строгой типизации если я туда передам NULL то получаю ошибку.
+     * Пока что я придумал только передавать 0. Так как id 0 быть не может.
+     */
 
     //Методы класса
 
@@ -54,7 +66,7 @@ class TaskStrategy
      */
     public function getStatusMap()
     {
-        return [
+        return (array) [
             self::STATUS_NEW => 'Новое',
             self::STATUS_CANCELLED => 'Отменено',
             self::STATUS_PROGRESS => 'В работе',
@@ -70,7 +82,7 @@ class TaskStrategy
      */
     public function getActionMap()
     {
-        return [
+        return (array) [
             self::ACTION_CANCEL => 'Отменить',
             self::ACTION_TAKE => 'Откликнуться',
             self::ACTION_DONE => 'Выполнено',
@@ -79,31 +91,31 @@ class TaskStrategy
     } 
 
     /**
-     * Определяем роль юзера для этой задачи
+     * Определяет роль юзера для этой задачи
      * 
      * @param int $userID
      * 
      * @return string $role
      */
-    private function getUserRole($userID) {
-        return ($userID === $this->clientId) ? 'client' : 'contractor';
+    private function getUserRole(int $userID) {
+        return (string) ($userID === $this->clientId) ? 'client' : 'contractor';
     }
 
     /**
-     * Определяем список доступных действий в зависимости от статуса и роли юзера
+     * Определяет список доступных действий в зависимости от статуса и роли юзера
      * 
      * @param string $currentStatus
      * 
      * @return string
      */
-    public function getAvalibleAction($currentStatus) {
+    public function getAvailableAction(string $currentStatus) {
         $role = $this->getUserRole($this->userID);
         switch ($currentStatus) {
             case self::STATUS_NEW:
-                return ($role === 'client') ? self::ACTION_CANCEL : self::ACTION_TAKE;
+                return (string) ($role === 'client') ? self::ACTION_CANCEL : self::ACTION_TAKE;
             break;
             case self::STATUS_PROGRESS:
-                return ($role === 'client') ? self::ACTION_DONE : self::ACTION_FAILED;
+                return (string) ($role === 'client') ? self::ACTION_DONE : self::ACTION_FAILED;
         }
     }
 
@@ -114,21 +126,23 @@ class TaskStrategy
      * 
      * @return string
      */
-    public function changingStatus($action) {
+    public function changeStatus(string $action) {
         switch ($action) {
             case self::ACTION_CANCEL:
-                return self::STATUS_CANCELLED;
+                $status = self::STATUS_CANCELLED;
             break;
             case self::ACTION_DONE:
-                return self::STATUS_SUCCESS;
+                $status = self::STATUS_SUCCESS;
             break;
             case self::ACTION_FAILED:
-                return self::STATUS_FAILED;
+                $status = self::STATUS_FAILED;
             break;
             case self::ACTION_CONTRACTOR_SELECTED:
-                return self::STATUS_SUCCESS;
+                $status = self::STATUS_PROGRESS;
             break;
         }
+
+        return (string) $status;
     }
       
     
@@ -139,8 +153,8 @@ class TaskStrategy
      *
      * @return string $russianStatus
      */
-    public function getRussianStatus($status) {
-          return $this->getStatusMap()[$status];
+    public function getRussianStatus(string $status) {
+          return (string) $this->getStatusMap()[$status];
     }
 
     /**
@@ -150,7 +164,7 @@ class TaskStrategy
      *
      * @return string $russianAction
      */
-    public function getRussianAvalibleAction($action) {
-        return $this->getActionMap()[$action];
+    public function getRussianAvailableAction(string $action) {
+        return (string) $this->getActionMap()[$action];
     }
 }

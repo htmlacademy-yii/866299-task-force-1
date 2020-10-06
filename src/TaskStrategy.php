@@ -37,13 +37,13 @@ class TaskStrategy
      * Конструктор класса
      * 
      * @param string $currentStatus текущий статус задания
-     * @param int $contractorID id исполнителя
+     * @param int|null $contractorID id исполнителя
      * @param int $clientId id заказчика
      * @param int $userID id текущего юзера
      * 
      */
 
-    public function __construct(string $currentStatus, int $contractorID, int $clientId, int $userID)
+    public function __construct(string $currentStatus, ?int $contractorID, int $clientId, int $userID)
     {
         $this->currentStatus = $currentStatus;
         $this->contractorID = $contractorID;
@@ -64,7 +64,7 @@ class TaskStrategy
      * 
      * @return array
      */
-    public function getStatusMap()
+    public function getStatusMap(): array
     {
         return (array) [
             self::STATUS_NEW => 'Новое',
@@ -80,7 +80,7 @@ class TaskStrategy
      * 
      * @return array
      */
-    public function getActionMap()
+    public function getActionMap(): array
     {
         return (array) [
             self::ACTION_CANCEL => 'Отменить',
@@ -97,8 +97,9 @@ class TaskStrategy
      * 
      * @return string $role
      */
-    private function getUserRole(int $userID) {
-        return (string) ($userID === $this->clientId) ? 'client' : 'contractor';
+    private function getUserRole(int $userID): string
+    {
+        return ($userID === $this->clientId) ? 'client' : 'contractor';
     }
 
     /**
@@ -108,14 +109,15 @@ class TaskStrategy
      * 
      * @return string
      */
-    public function getAvailableAction(string $currentStatus) {
+    public function getAvailableAction(string $currentStatus): string
+    {
         $role = $this->getUserRole($this->userID);
         switch ($currentStatus) {
             case self::STATUS_NEW:
-                return (string) ($role === 'client') ? self::ACTION_CANCEL : self::ACTION_TAKE;
+                return ($role === 'client') ? self::ACTION_CANCEL : self::ACTION_TAKE;
             break;
             case self::STATUS_PROGRESS:
-                return (string) ($role === 'client') ? self::ACTION_DONE : self::ACTION_FAILED;
+                return ($role === 'client') ? self::ACTION_DONE : self::ACTION_FAILED;
         }
     }
 
@@ -126,23 +128,22 @@ class TaskStrategy
      * 
      * @return string
      */
-    public function changeStatus(string $action) {
+    public function changeStatus(string $action): string 
+    {
         switch ($action) {
             case self::ACTION_CANCEL:
-                $status = self::STATUS_CANCELLED;
+                return self::STATUS_CANCELLED;
             break;
             case self::ACTION_DONE:
-                $status = self::STATUS_SUCCESS;
+                return self::STATUS_SUCCESS;
             break;
             case self::ACTION_FAILED:
-                $status = self::STATUS_FAILED;
+                return self::STATUS_FAILED;
             break;
             case self::ACTION_CONTRACTOR_SELECTED:
-                $status = self::STATUS_PROGRESS;
+                return self::STATUS_PROGRESS;
             break;
         }
-
-        return (string) $status;
     }
       
     
@@ -153,8 +154,9 @@ class TaskStrategy
      *
      * @return string $russianStatus
      */
-    public function getRussianStatus(string $status) {
-          return (string) $this->getStatusMap()[$status];
+    public function getRussianStatus(string $status): string
+    {
+          return $this->getStatusMap()[$status];
     }
 
     /**
@@ -164,7 +166,8 @@ class TaskStrategy
      *
      * @return string $russianAction
      */
-    public function getRussianAvailableAction(string $action) {
-        return (string) $this->getActionMap()[$action];
+    public function getRussianAvailableAction(string $action): string
+    {
+        return $this->getActionMap()[$action];
     }
 }

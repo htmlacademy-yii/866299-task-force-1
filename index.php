@@ -1,5 +1,5 @@
 <?php
-use taskforce\TaskStrategy;
+use taskforce\strategies\TaskStrategy;
 require_once 'vendor/autoload.php';
 
 

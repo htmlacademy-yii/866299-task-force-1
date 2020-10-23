@@ -7,170 +7,181 @@ USE taskforce;
 /*
 Таблица с прекрипленными к задаче файлами
 */
-CREATE TABLE TaskFiles (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    FilePath VARCHAR(128) NOT NULL,
-    FileTitle VARCHAR(128) NOT NULL 
+CREATE TABLE task_files (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    path VARCHAR(128) NOT NULL,
+    title VARCHAR(128) NOT NULL 
 );
 
 /*
 Таблица содержит все доступные для задач категории
 */
-CREATE TABLE AvailableСategories (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    Category VARCHAR(128) NOT NULL,
-    CategoryIcon VARCHAR(128) NOT NULL
+CREATE TABLE categories (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    category VARCHAR(128) NOT NULL,
+    category_icon VARCHAR(128) NOT NULL
 );
 
 /*
 Все доступные города
 */
-CREATE TABLE Cities (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    City VARCHAR(128) NOT NULL
+CREATE TABLE cities (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    city VARCHAR(128) NOT NULL
 );
 
 /*
 Содержит фото работ исполнителей
 */
-CREATE TABLE Portfolios (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    PortfolioPath VARCHAR(128) NOT NULL
+CREATE TABLE portfolios (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    path VARCHAR(128) NOT NULL
 );
 
 
 /*
 Таблица пользователей, содержит информацию о пользователях
 */
-CREATE TABLE Users (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    RegistrationDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    Email VARCHAR(128) NOT NULL,
-    UserName VARCHAR(128) NOT NULL,
-    UserCityID INT UNSIGNED NOT NULL,
-    UserPassword VARCHAR(128) NOT NULL,
-    UserAvatar VARCHAR(128),
-    UserDescription VARCHAR(512),
-    UserBirthday DATETIME,
-    UserPhone VARCHAR(128),
-    UserSkype VARCHAR(128),
-    UserTelegram VARCHAR(128),
-    ShowProfile BOOLEAN DEFAULT 0,
-    NewMessageNotification BOOLEAN DEFAULT 1,
-    TaskActionsNotification BOOLEAN DEFAULT 1,
-    NewFeedbackNotification BOOLEAN DEFAULT 1,
-    ShowProfileOnlyToClien BOOLEAN DEFAULT 0,
+CREATE TABLE users (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    registration_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    email VARCHAR(128) NOT NULL,
+    name VARCHAR(128) NOT NULL,
+    city_id INT UNSIGNED NOT NULL,
+    password VARCHAR(128) NOT NULL,
+    avatar VARCHAR(128),
+    description VARCHAR(512),
+    birthday DATETIME,
+    phone VARCHAR(128),
+    skype VARCHAR(128),
+    telegram VARCHAR(128),
+    
+    
 
-    FOREIGN KEY (UserCityId) REFERENCES Cities (Id)
+    FOREIGN KEY (city_id) REFERENCES cities (id)
 );
 
 /*
 Таблица с задчами, содержит всю информацию о задаче.
 */
 CREATE TABLE tasks (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    CreationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    Title VARCHAR(128) NOT NULL,
-    TaskDescription VARCHAR(256),
-    Budget INT UNSIGNED,
-    Deadline TIMESTAMP,
-    CategotyId INT UNSIGNED NOT NULL,
-    OwnerId INT UNSIGNED NOT NULL,
-    CityId INT UNSIGNED,
-    Coordinates VARCHAR(128),
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    title VARCHAR(128) NOT NULL,
+    description VARCHAR(256),
+    budget INT UNSIGNED,
+    deadline TIMESTAMP,
+    categoty_id INT UNSIGNED NOT NULL,
+    owner_id INT UNSIGNED NOT NULL,
+    city_id INT UNSIGNED,
+    coordinates VARCHAR(128),
 
-    FOREIGN KEY (CategotyId) REFERENCES AvailableСategories (Id),
-    FOREIGN KEY (OWnerId) REFERENCES Users (Id),
-    FOREIGN KEY (CityId) REFERENCES Cities (Id)
+    FOREIGN KEY (categoty_id) REFERENCES categories (id),
+    FOREIGN KEY (oWner_id) REFERENCES users (id),
+    FOREIGN KEY (city_id) REFERENCES cities (id)
 );
 
 /*
 Таблица содержит отношение прикрепленных файлов к задаче
 */
-CREATE TABLE FilesToTask (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    FileId INT UNSIGNED NOT NULL,
-    TaskId INT UNSIGNED NOT NULL,
+CREATE TABLE files_to_task (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    file_id INT UNSIGNED NOT NULL,
+    task_id INT UNSIGNED NOT NULL,
 
-    FOREIGN KEY (FileId) REFERENCES TaskFiles (Id),
-    FOREIGN KEY (TaskId) REFERENCES tasks (Id)
+    FOREIGN KEY (file_id) REFERENCES task_files (id),
+    FOREIGN KEY (task_id) REFERENCES tasks (id)
 );
 
 /*
 Таблица содержит все доступные специализации для пользователей
 */
-CREATE TABLE AvailableSpecialization (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    Specialization VARCHAR(128) NOT NULL
+CREATE TABLE specializations (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    specialization VARCHAR(128) NOT NULL
 );
 
 /*
 Таблица содержит информацию о том какие специализации выбрали исполнители
 */
-CREATE TABLE SpecializationToUser (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    SpecializationId INT UNSIGNED NOT NULL,
-    UserId INT UNSIGNED NOT NULL,
+CREATE TABLE specialization_to_user (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    specialization_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
 
-    FOREIGN KEY (SpecializationId) REFERENCES AvailableSpecialization (Id),
-    FOREIGN KEY (UserId) REFERENCES Users (Id)
+    FOREIGN KEY (specialization_id) REFERENCES specializations (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 
 /*
 Определяет соответствие фото выполненой работы с пользовотелем
 */
-CREATE TABLE PortfolioToUser (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    PortfolioId INT UNSIGNED NOT NULL,
-    UserId INT UNSIGNED NOT NULL,
+CREATE TABLE portfolio_to_user (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    portfolio_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
 
-    FOREIGN KEY (PortfolioId) REFERENCES Portfolios (Id),
-    FOREIGN KEY (UserId) REFERENCES Users (Id)
+    FOREIGN KEY (portfolio_id) REFERENCES portfolios (id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 /*
 Таблица с отзывами о проделаной работе
 */
 
-CREATE TABLE Feedbacks (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    Feedback VARCHAR(256) NOT NULL,
-    Rate INT UNSIGNED NOT NULL,
-    UserWhoId INT UNSIGNED NOT NULL,
-    UserToId INT UNSIGNED NOT NULL,
+CREATE TABLE feedbacks (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    feedback VARCHAR(256) NOT NULL,
+    rate INT UNSIGNED NOT NULL,
+    user_who_id INT UNSIGNED NOT NULL,
+    user_to_id INT UNSIGNED NOT NULL,
 
-    FOREIGN KEY (UserWhoId) REFERENCES Users (Id),
-    FOREIGN KEY (UserToId) REFERENCES Users (Id) 
+    FOREIGN KEY (user_who_id) REFERENCES users (id),
+    FOREIGN KEY (user_to_id) REFERENCES users (id) 
 );
 
 
 /*
 Таблица содержит отклик на задачу
 */
-CREATE TABLE Responses (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    ResponseDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ResponseDescription VARCHAR(256),
-    ResponsePrice INT UNSIGNED,
-    UserWhoId INT UNSIGNED NOT NULL,
-    TaskId INT UNSIGNED NOT NULL,
+CREATE TABLE responses (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    description VARCHAR(256),
+    price INT UNSIGNED,
+    user_who_id INT UNSIGNED NOT NULL,
+    task_id INT UNSIGNED NOT NULL,
 
-    FOREIGN KEY (UserWhoId)  REFERENCES Users (id),
-    FOREIGN KEY (TaskId)  REFERENCES tasks (id)
+    FOREIGN KEY (user_who_id)  REFERENCES users (id),
+    FOREIGN KEY (task_id)  REFERENCES tasks (id)
 );
 
 /*
 Таблица сообщений
 */
-CREATE TABLE Messages (
-    Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    message_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE messages (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     content VARCHAR(512) NOT NULL,
 
-    UserWhoId INT UNSIGNED NOT NULL,
-    UserToId INT UNSIGNED NOT NULL,
+    user_who_id INT UNSIGNED NOT NULL,
+    user_to_id INT UNSIGNED NOT NULL,
 
-    FOREIGN KEY (UserWhoId) REFERENCES Users (Id),
-    FOREIGN KEY (UserToId) REFERENCES Users (Id) 
+    FOREIGN KEY (user_who_id) REFERENCES users (id),
+    FOREIGN KEY (user_to_id) REFERENCES users (id) 
+);
+
+
+/*
+Таблица содержит настройки аккаунта для пользователя
+*/
+CREATE TABLE user_setup (
+    show_profile BOOLEAN DEFAULT 0,
+    new_message_notification BOOLEAN DEFAULT 1,
+    new_feedback_notification BOOLEAN DEFAULT 1,
+    show_profile_only_to_client BOOLEAN DEFAULT 0,
+    user_id INT UNSIGNED NOT NUll,
+
+    FOREIGN KEY (user_id) REFERENCES users (id)
 );

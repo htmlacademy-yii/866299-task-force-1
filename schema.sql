@@ -4,22 +4,15 @@ CREATE DATABASE taskforce
 
 USE taskforce;
 
-/*
-Таблица с прекрипленными к задаче файлами
-*/
-CREATE TABLE task_files (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    path VARCHAR(128) NOT NULL,
-    title VARCHAR(128) NOT NULL 
-);
+
 
 /*
 Таблица содержит все доступные для задач категории
 */
 CREATE TABLE categories (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    category VARCHAR(128) NOT NULL,
-    category_icon VARCHAR(128) NOT NULL
+    title VARCHAR(128) NOT NULL,
+    icon VARCHAR(128) NOT NULL
 );
 
 /*
@@ -27,17 +20,8 @@ CREATE TABLE categories (
 */
 CREATE TABLE cities (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    city VARCHAR(128) NOT NULL
+    name VARCHAR(128) NOT NULL
 );
-
-/*
-Содержит фото работ исполнителей
-*/
-CREATE TABLE portfolios (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    path VARCHAR(128) NOT NULL
-);
-
 
 /*
 Таблица пользователей, содержит информацию о пользователях
@@ -62,6 +46,17 @@ CREATE TABLE users (
 );
 
 /*
+Содержит фото работ исполнителей
+*/
+CREATE TABLE portfolios (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    path VARCHAR(128) NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+/*
 Таблица с задчами, содержит всю информацию о задаче.
 */
 CREATE TABLE tasks (
@@ -82,15 +77,15 @@ CREATE TABLE tasks (
 );
 
 /*
-Таблица содержит отношение прикрепленных файлов к задаче
+Таблица с прекрипленными к задаче файлами
 */
-CREATE TABLE files_to_task (
+CREATE TABLE task_files (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    file_id INT UNSIGNED NOT NULL,
+    path VARCHAR(128) NOT NULL,
+    title VARCHAR(128) NOT NULL,
     task_id INT UNSIGNED NOT NULL,
 
-    FOREIGN KEY (file_id) REFERENCES task_files (id),
-    FOREIGN KEY (task_id) REFERENCES tasks (id)
+    FOREIGN KEY (task_id) REFERENCES tasks (id) 
 );
 
 /*
@@ -104,28 +99,14 @@ CREATE TABLE specializations (
 /*
 Таблица содержит информацию о том какие специализации выбрали исполнители
 */
-CREATE TABLE specialization_to_user (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE user_specialization (
     specialization_id INT UNSIGNED NOT NULL,
     user_id INT UNSIGNED NOT NULL,
-
+    
+    PRIMARY KEY (specialization_id, user_id),
     FOREIGN KEY (specialization_id) REFERENCES specializations (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
-
-
-/*
-Определяет соответствие фото выполненой работы с пользовотелем
-*/
-CREATE TABLE portfolio_to_user (
-    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    portfolio_id INT UNSIGNED NOT NULL,
-    user_id INT UNSIGNED NOT NULL,
-
-    FOREIGN KEY (portfolio_id) REFERENCES portfolios (id),
-    FOREIGN KEY (user_id) REFERENCES users (id)
-);
-
 /*
 Таблица с отзывами о проделаной работе
 */
@@ -147,13 +128,13 @@ CREATE TABLE feedbacks (
 */
 CREATE TABLE responses (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    response_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     description VARCHAR(256),
     price INT UNSIGNED,
-    user_who_id INT UNSIGNED NOT NULL,
+    user_from_id INT UNSIGNED NOT NULL,
     task_id INT UNSIGNED NOT NULL,
 
-    FOREIGN KEY (user_who_id)  REFERENCES users (id),
+    FOREIGN KEY (user_from_id)  REFERENCES users (id),
     FOREIGN KEY (task_id)  REFERENCES tasks (id)
 );
 
@@ -165,10 +146,10 @@ CREATE TABLE messages (
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     content VARCHAR(512) NOT NULL,
 
-    user_who_id INT UNSIGNED NOT NULL,
+    user_from_id INT UNSIGNED NOT NULL,
     user_to_id INT UNSIGNED NOT NULL,
 
-    FOREIGN KEY (user_who_id) REFERENCES users (id),
+    FOREIGN KEY (user_from_id) REFERENCES users (id),
     FOREIGN KEY (user_to_id) REFERENCES users (id) 
 );
 
@@ -177,9 +158,10 @@ CREATE TABLE messages (
 Таблица содержит настройки аккаунта для пользователя
 */
 CREATE TABLE user_setup (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     show_profile BOOLEAN DEFAULT 0,
-    new_message_notification BOOLEAN DEFAULT 1,
-    new_feedback_notification BOOLEAN DEFAULT 1,
+    new_message_notification BOOLEAN,
+    new_feedback_notification BOOLEAN,
     show_profile_only_to_client BOOLEAN DEFAULT 0,
     user_id INT UNSIGNED NOT NUll,
 

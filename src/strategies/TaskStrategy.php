@@ -1,6 +1,12 @@
 <?php
 declare(strict_types = 1);
+
 namespace taskforce\strategies;
+
+use taskforce\strategies\actions\ActionCancel;
+use taskforce\strategies\actions\ActionTake;
+use taskforce\strategies\actions\ActionDone;
+use taskforce\strategies\actions\ActionFailed;
 
 /**
  * Класс TaskStrategy
@@ -26,36 +32,34 @@ class TaskStrategy
     const ACTION_DONE = 'done'; // Отметить как выполненое — заказчик (в работе)
     const ACTION_FAILED = 'failed'; // Отказаться от здания — исполнитель (в работе)
     
+    
+    
     // Свойства класса
     
     public $currentStatus;
     private $contractorID;
-    private $clientId;
+    private $clientID;
     private $userID;
+
+   
 
     /**
      * Конструктор класса
      * 
      * @param string $currentStatus текущий статус задания
      * @param int|null $contractorID id исполнителя
-     * @param int $clientId id заказчика
+     * @param int $clientID id заказчика
      * @param int $userID id текущего юзера
      * 
      */
 
-    public function __construct(string $currentStatus, ?int $contractorID, int $clientId, int $userID)
+    public function __construct(string $currentStatus, ?int $contractorID, int $clientID, int $userID)
     {
         $this->currentStatus = $currentStatus;
         $this->contractorID = $contractorID;
-        $this->clientId = $clientId;
+        $this->clientID = $clientID;
         $this->userID = $userID;
     }
-
-    /**
-     * Q: Что делать с contractorID? 
-     * Дело в том, что при строгой типизации если я туда передам NULL то получаю ошибку.
-     * Пока что я придумал только передавать 0. Так как id 0 быть не может.
-     */
 
     //Методы класса
 
@@ -73,7 +77,7 @@ class TaskStrategy
             self::STATUS_SUCCESS => 'Выполнено',
             self::STATUS_FAILED => 'Провалено'
         ];
-    } 
+    }
 
     /**
      * Создает "карту" для действий
@@ -83,23 +87,11 @@ class TaskStrategy
     public function getActionMap(): array
     {
         return (array) [
-            self::ACTION_CANCEL => 'Отменить',
-            self::ACTION_TAKE => 'Откликнуться',
-            self::ACTION_DONE => 'Выполнено',
-            self::ACTION_FAILED => 'Отказаться'
+            self::ACTION_CANCEL => new ActionCancel(),
+            self::ACTION_TAKE => new ActionTake(),
+            self::ACTION_DONE => new ActionDone(),
+            self::ACTION_FAILED => new ActionFailed()
         ];
-    } 
-
-    /**
-     * Определяет роль юзера для этой задачи
-     * 
-     * @param int $userID
-     * 
-     * @return string $role
-     */
-    private function getUserRole(int $userID): string
-    {
-        return ($userID === $this->clientId) ? 'client' : 'contractor';
     }
 
     /**
@@ -109,16 +101,27 @@ class TaskStrategy
      * 
      * @return string
      */
-    public function getAvailableAction(string $currentStatus): string
+    public function getAvailableAction(string $currentStatus): array
     {
-        $role = $this->getUserRole($this->userID);
+        $mapActions = $this->getActionMap();
+        $avalibleActions = [];
         switch ($currentStatus) {
             case self::STATUS_NEW:
-                return ($role === 'client') ? self::ACTION_CANCEL : self::ACTION_TAKE;
+                if($mapActions['cancel']->checkRules($this->contractorID, $this->clientID, $this->userID)) {
+                    $avalibleActions[] = $mapActions['cancel']->getActionName();
+                } else if ($mapActions['take']->checkRules($this->contractorID, $this->clientID, $this->userID)) {
+                    $avalibleActions[] = $mapActions['take']->getActionName();
+                }      
             break;
             case self::STATUS_PROGRESS:
-                return ($role === 'client') ? self::ACTION_DONE : self::ACTION_FAILED;
+                if($mapActions['done']->checkRules($this->contractorID, $this->clientID, $this->userID)) {
+                    $avalibleActions[] = $mapActions['done']->getActionName();
+                } else if ($mapActions['failed']->checkRules($this->contractorID, $this->clientID, $this->userID)) {
+                    $avalibleActions[] = $mapActions['failed']->getActionName();
+                }
+            break;       
         }
+        return $avalibleActions;
     }
 
     /**
@@ -145,8 +148,7 @@ class TaskStrategy
             break;
         }
     }
-      
-    
+       
     /**
      * Получаем название статуса на русском языке
      *

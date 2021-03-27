@@ -11,11 +11,12 @@ require_once 'vendor/autoload.php';
 
 //проверка на то что корректно работает функция на права доступа к кнопке у классов действий
 $actionCancel = new ActionCancel();
-assert($actionCancel->checkRules(10, 2, 2) === true, 'проверка что клиент может отменить задание');
-assert($actionCancel->checkRules(2, 10, 2) === false, 'проверка что исполнитель не может отменить задание');
+assert($actionCancel->isActionAvalible(10, 2, 2) === true, 'проверка что клиент может отменить задание');
+assert($actionCancel->isActionAvalible(2, 10, 2) === false, 'проверка что исполнитель не может отменить задание');
+
 $actionDone = new ActionDone();
-assert($actionCancel->checkRules(10, 2, 2) === true, 'проверка что клиент может пометить задание как выплненое');
-assert($actionCancel->checkRules(2, 10, 2) === false, 'проверка что исполнитель не может пометить задание как выплненое');
+assert($actionCancel->isActionAvalible(10, 2, 2) === true, 'проверка что клиент может пометить задание как выплненое');
+assert($actionCancel->isActionAvalible(2, 10, 2) === false, 'проверка что исполнитель не может пометить задание как выплненое');
 
 
 
@@ -27,16 +28,17 @@ assert($task->changeStatus(TaskStrategy::ACTION_CONTRACTOR_SELECTED) === TaskStr
 
 
 $testTaskOne = new TaskStrategy('new', 10, 5, 5);
-assert(current($testTaskOne->getAvailableAction('new')) === 'Отменить задание', 'Проверка на доступные действия пользователь и клиент это один человек. Статус задачи новое');
+assert(current($testTaskOne->getAvailableAction('new')) === 'cancel', 'Проверка на доступные действия пользователь и клиент это один человек. Статус задачи новое');
 
 $testTaskTwo = new TaskStrategy('new', 10, 5, 11);
-assert(current($testTaskTwo->getAvailableAction('new')) === 'Откликнуться', 'Проверка на доступные действия пользователь и клиент разные люди. Статус задачи новое');
+assert(current($testTaskTwo->getAvailableAction('new')) === 'take', 'Проверка на доступные действия пользователь и клиент разные люди. Статус задачи новое');
 
 $testTaskThree = new TaskStrategy('progress', 14, 10, 10);
-assert(current($testTaskThree->getAvailableAction('progress')) === 'Выполнено', 'Проверка на доступные действия пользователь и клиент это один человек. Статус задачи в работе');
+assert(current($testTaskThree->getAvailableAction('progress')) === 'done', 'Проверка на доступные действия пользователь и клиент это один человек. Статус задачи в работе');
 
 $testTaskFour = new TaskStrategy('progress', 10, 2, 10);
-assert(current($testTaskFour->getAvailableAction('progress')) === 'Отказаться от задания', 'Проверка на доступные действия пользователь и исполнитель это один человек. Статус задачи в работе');
+assert(current($testTaskFour->getAvailableAction('progress')) === 'failed', 'Проверка на доступные действия пользователь и исполнитель это один человек. Статус задачи в работе');
 
 $testTaskFive = new TaskStrategy('new', 10, 5, 10);
 assert(current($testTaskFive->getAvailableAction('new'))[0] === NULL, 'Проверка на доступные действия пользователь и исполнитель это один человек.Статус задачи новое');
+

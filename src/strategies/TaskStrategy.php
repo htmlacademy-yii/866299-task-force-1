@@ -10,9 +10,8 @@ use taskforce\strategies\actions\ActionFailed;
 
 /**
  * Класс TaskStrategy
- * @package taskforce
  */
-class TaskStrategy 
+final class TaskStrategy 
 {
     // Статусы задачи
     
@@ -24,6 +23,11 @@ class TaskStrategy
    
 
     // Возможные действия
+    /** 
+     * Q: зачем эти константы? не проще ли их заменить на классы? ну всмысле на методы классов?
+     * Тогда если вдруг нужно будует поменять название с cancel на abort например это нужно будет сделать только в классе
+     * Вопрос только как это сделать? Просто удалить их здесь? и везде где они используются заменить на методы из классов действий?
+    */
 
     const ACTION_CANCEL = 'cancel'; // Отменить задание — заказчик (новое)
     const ACTION_TAKE = 'take'; // Откликнуться на задание — исполнитель (новое)
@@ -38,9 +42,13 @@ class TaskStrategy
     
     public $currentStatus;
     private $contractorID;
-    private $clientID;
+    private $clientId;
     private $userID;
 
+    public $actionCancel;
+    public $actionTake;
+    public $actionDone;
+    public $actionFailed;
    
 
     /**
@@ -48,25 +56,28 @@ class TaskStrategy
      * 
      * @param string $currentStatus текущий статус задания
      * @param int|null $contractorID id исполнителя
-     * @param int $clientID id заказчика
+     * @param int $clientId id заказчика
      * @param int $userID id текущего юзера
      * 
      */
 
-    public function __construct(string $currentStatus, ?int $contractorID, int $clientID, int $userID)
+    public function __construct(string $currentStatus, ?int $contractorID, int $clientId, int $userID)
     {
         $this->currentStatus = $currentStatus;
         $this->contractorID = $contractorID;
-        $this->clientID = $clientID;
+        $this->clientId = $clientId;
         $this->userID = $userID;
+
+        $this->actionCancel = new ActionCancel();
+        $this->actionTake = new ActionTake();
+        $this->actionDone = new ActionDone();
+        $this->actionFailed = new ActionFailed();
     }
 
     //Методы класса
 
     /**
      * Создает "карту" статусов
-     * 
-     * @return array
      */
     public function getStatusMap(): array
     {
@@ -81,55 +92,49 @@ class TaskStrategy
 
     /**
      * Создает "карту" для действий
-     * 
-     * @return array
      */
     public function getActionMap(): array
     {
         return (array) [
-            self::ACTION_CANCEL => new ActionCancel(),
-            self::ACTION_TAKE => new ActionTake(),
-            self::ACTION_DONE => new ActionDone(),
-            self::ACTION_FAILED => new ActionFailed()
+            self::ACTION_CANCEL => $this->actionCancel->getActionName(),
+            self::ACTION_TAKE => $this->actionTake->getActionName(),
+            self::ACTION_DONE => $this->actionDone->getActionName(),
+            self::ACTION_FAILED => $this->actionFailed->getActionName()
         ];
+    }
+
+    /**
+     * Создает двумерный массив отношений действий к статусам
+     */
+    public function getActionsToStatus(): array
+    {
+        $new = array($this->actionCancel, $this->actionTake);
+        $progress = array($this->actionDone, $this->actionFailed);
+        return array(self::STATUS_NEW=>$new, self::STATUS_PROGRESS=>$progress);
     }
 
     /**
      * Определяет список доступных действий в зависимости от статуса и роли юзера
      * 
-     * @param string $currentStatus
-     * 
-     * @return string
+     * @param string $currentStatus текущий статус задачи
      */
     public function getAvailableAction(string $currentStatus): array
     {
-        $mapActions = $this->getActionMap();
+        $allActions = $this->getActionsToStatus();
         $avalibleActions = [];
-        switch ($currentStatus) {
-            case self::STATUS_NEW:
-                if($mapActions['cancel']->checkRules($this->contractorID, $this->clientID, $this->userID)) {
-                    $avalibleActions[] = $mapActions['cancel']->getActionName();
-                } else if ($mapActions['take']->checkRules($this->contractorID, $this->clientID, $this->userID)) {
-                    $avalibleActions[] = $mapActions['take']->getActionName();
-                }      
-            break;
-            case self::STATUS_PROGRESS:
-                if($mapActions['done']->checkRules($this->contractorID, $this->clientID, $this->userID)) {
-                    $avalibleActions[] = $mapActions['done']->getActionName();
-                } else if ($mapActions['failed']->checkRules($this->contractorID, $this->clientID, $this->userID)) {
-                    $avalibleActions[] = $mapActions['failed']->getActionName();
-                }
-            break;       
+        foreach ($allActions[$currentStatus] as $action) {
+            if ($action->isActionAvalible($this->contractorID, $this->clientId, $this->userID)) {
+                $avalibleActions[] = $action->getActionInternalName();
+            }
         }
+
         return $avalibleActions;
     }
 
     /**
      * Меняем статус если были какие-то действия
      * 
-     * @param string $action
-     * 
-     * @return string
+     * @param string $action совершенное действие
      */
     public function changeStatus(string $action): string 
     {
@@ -152,9 +157,7 @@ class TaskStrategy
     /**
      * Получаем название статуса на русском языке
      *
-     * @param string $status
-     *
-     * @return string $russianStatus
+     * @param string $status внутренее названия статуса задания
      */
     public function getRussianStatus(string $status): string
     {
@@ -164,9 +167,7 @@ class TaskStrategy
     /**
      * Получаем название действия на русском языке
      *
-     * @param string $action
-     *
-     * @return string $russianAction
+     * @param string $action внутреннее название действия
      */
     public function getRussianAvailableAction(string $action): string
     {

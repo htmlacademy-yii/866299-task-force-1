@@ -5,40 +5,25 @@ namespace taskforce\strategies\actions;
 /**
  * Класс ActionCancel
  * Отменяет задание, если оно имеет статус новое и это делает заказчик
- * @package taskforce
  */
-class ActionCancel extends Action 
+final class ActionCancel extends Action 
 {
     /**
-     * Метод возвращает читабельное название действия
-     * 
-     * @return string
+     * Конструктор класса
      */
-    public function getActionName() : string 
+    public function __construct()
     {
-        return "Отменить задание";
+        $this->actionName = 'Отменить задание';
+        $this->actionInternalName = 'cancel';
     }
 
     /**
-     * Метод возвращает внутреннее название действия
-     * 
-     * @return string
-     */
-    public function getActionInternalName() : string {
-        return "cancel";
-    }
-    /**
      * Метод проверяет права доступа к действию
      * Отменить задание может только заказчик и если задание имеет статус новое
-     * 
-     * @return bool
      */
-    public function checkRules(?int $contractorID, int $clientId, int $userID) : bool 
+    public function isActionAvalible(?int $contractorID, int $clientId, int $userID): bool 
     {
-        if ($userID === $clientId) {
-            return true;
-        }
-        return false;
+        return $userID === $clientId;
     }
 
 }

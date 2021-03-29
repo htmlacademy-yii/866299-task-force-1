@@ -99,7 +99,7 @@ CREATE TABLE specializations (
 /*
 Таблица содержит информацию о том какие специализации выбрали исполнители
 */
-CREATE TABLE user_specialization (
+CREATE TABLE user_specializations (
     specialization_id INT UNSIGNED NOT NULL,
     user_id INT UNSIGNED NOT NULL,
     

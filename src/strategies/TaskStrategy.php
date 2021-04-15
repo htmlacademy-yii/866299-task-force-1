@@ -7,6 +7,8 @@ use taskforce\strategies\actions\ActionCancel;
 use taskforce\strategies\actions\ActionTake;
 use taskforce\strategies\actions\ActionDone;
 use taskforce\strategies\actions\ActionFailed;
+use taskforce\exeptions\TaskActionExeption;
+use taskforce\exeptions\TaskStatusExeption;
 
 /**
  * Класс TaskStrategy
@@ -64,6 +66,9 @@ final class TaskStrategy
     public function __construct(string $currentStatus, ?int $contractorID, int $clientId, int $userID)
     {
         $this->currentStatus = $currentStatus;
+        if (!isset($this->getStatusMap()[$currentStatus])) {
+            throw new TaskStatusExeption('Передан не существующий статус задачи');
+        }
         $this->contractorID = $contractorID;
         $this->clientId = $clientId;
         $this->userID = $userID;
@@ -138,6 +143,9 @@ final class TaskStrategy
      */
     public function changeStatus(string $action): string 
     {
+        if(!isset($this->getActionMap()[$action])) {
+            throw new TaskActionExeption('Передано не существующее действие для задачи');
+        }
         switch ($action) {
             case self::ACTION_CANCEL:
                 return self::STATUS_CANCELLED;

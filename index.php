@@ -3,7 +3,8 @@
 use taskforce\strategies\TaskStrategy;
 use taskforce\strategies\actions\ActionCancel;
 use taskforce\strategies\actions\ActionDone;
-
+use taskforce\exeptions\TaskActionExeption;
+use taskforce\exeptions\TaskStatusExeption;
 require_once 'vendor/autoload.php';
 
 
@@ -21,12 +22,16 @@ assert($actionCancel->isActionAvalible(2, 10, 2) === false, 'проверка ч
 
 
 $task = new TaskStrategy('new', null, 5, 5);
+try {
 assert($task->changeStatus(TaskStrategy::ACTION_DONE) === TaskStrategy::STATUS_SUCCESS, 'action_cancel');
 assert($task->changeStatus(TaskStrategy::ACTION_CANCEL) === TaskStrategy::STATUS_CANCELLED, 'action_cancel');
 assert($task->changeStatus(TaskStrategy::ACTION_FAILED) === TaskStrategy::STATUS_FAILED, 'action_failed');
-assert($task->changeStatus(TaskStrategy::ACTION_CONTRACTOR_SELECTED) === TaskStrategy::STATUS_PROGRESS, 'action_contractor_selected');
+}
+catch (TaskActionExeption $e) {
+    print('Не удалось изменить статус задания:' . $e->getMessage());
+}
 
-
+try {
 $testTaskOne = new TaskStrategy('new', 10, 5, 5);
 assert(current($testTaskOne->getAvailableAction('new')) === 'cancel', 'Проверка на доступные действия пользователь и клиент это один человек. Статус задачи новое');
 
@@ -41,4 +46,7 @@ assert(current($testTaskFour->getAvailableAction('progress')) === 'failed', 'П�
 
 $testTaskFive = new TaskStrategy('new', 10, 5, 10);
 assert(current($testTaskFive->getAvailableAction('new'))[0] === NULL, 'Проверка на доступные действия пользователь и исполнитель это один человек.Статус задачи новое');
-
+}
+catch (TaskStatusExeption $e) {
+    print('Не удалось получить списко возможных действий:' . $e->getMessage());
+}

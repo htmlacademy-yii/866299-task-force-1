@@ -13,7 +13,7 @@ use taskforce\exeptions\TaskStatusExeption;
 /**
  * Класс TaskStrategy
  */
-final class TaskStrategy 
+final class TaskStrategy
 {
     // Статусы задачи
     

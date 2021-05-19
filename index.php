@@ -5,6 +5,17 @@ use taskforce\strategies\actions\ActionCancel;
 use taskforce\strategies\actions\ActionDone;
 use taskforce\exeptions\TaskActionExeption;
 use taskforce\exeptions\TaskStatusExeption;
+use taskforce\import\ImportData;
+use taskforce\exeptions\BadFileExeption;
+
+use taskforce\import\ConstructorCategories;
+use taskforce\import\ConstructorCities;
+use taskforce\import\ConstructorUsers;
+use taskforce\import\ConstructorTasks;
+use taskforce\import\ConstructorReplies;
+use taskforce\import\ConstructorOpinions;
+use taskforce\import\ConstructorProfiles;
+
 require_once 'vendor/autoload.php';
 
 
@@ -50,3 +61,94 @@ assert(current($testTaskFive->getAvailableAction('new'))[0] === NULL, 'Пров�
 catch (TaskStatusExeption $e) {
     print('Не удалось получить списко возможных действий:' . $e->getMessage());
 }
+
+
+
+//работа с файлом csv
+
+//добавляем категории
+$constructor = new ConstructorCategories;
+try {
+    $file = new ImportData('categories', ['name','icon']);
+    $file->import();
+    $file->upload($constructor);
+    printf('Файл categories.sql успешно записан'.PHP_EOL);
+}
+catch (BadFileExeption $e) {
+    print ('Не удалось импортировать файл: ' . $e->getMessage());
+}
+
+//добавляем города
+$constructor = new ConstructorCities;
+try {
+    $file = new ImportData('cities', ['city','lat','long']);
+    $file->import();
+    $file->upload($constructor);
+    print('Файл cities.sql успешно записан'.PHP_EOL);
+}
+catch (BadFileExeption $e) {
+    print ('Не удалось импортировать файл: ' . $e->getMessage());
+}
+
+//добавляем пользователей
+$constructor = new ConstructorUsers;
+try {
+    $file = new ImportData('users', ['email','name','password','dt_add']);
+    $file->import();
+    $file->upload($constructor);
+    print('Файл users.sql успешно записан'.PHP_EOL);
+}
+catch (BadFileExeption $e) {
+    print ('Не удалось импортировать файл: ' . $e->getMessage());
+}
+
+//добавляем задачи
+$constructor = new ConstructorTasks;
+try {
+    $file = new ImportData('tasks', ['dt_add','category_id','description','expire','name','address','budget','lat','long']);
+    $file->import();
+    $file->upload($constructor);
+    print('Файл tasks.sql успешно записан'.PHP_EOL);
+}
+catch (BadFileExeption $e) {
+    print ('Не удалось импортировать файл: ' . $e->getMessage());
+}
+
+//добавляем отклики к задачам
+$constructor = new ConstructorReplies;
+try {
+    $file = new ImportData('replies', ['dt_add', 'rate', 'description']);
+    $file->import();
+    $file->upload($constructor);
+    print('Файл replies.sql успешно записан'.PHP_EOL);
+}
+catch (BadFileExeption $e) {
+    print ('Не удалось импортировать файл: ' . $e->getMessage());
+}
+
+
+//добавляем отзывы к пользователям
+$constructor = new ConstructorOpinions;
+try {
+    $file = new ImportData('opinions', ['dt_add', 'rate', 'description']);
+    $file->import();
+    $file->upload($constructor);
+    print('Файл opinions.sql успешно записан'.PHP_EOL);
+}
+catch (BadFileExeption $e) {
+    print ('Не удалось импортировать файл: ' . $e->getMessage());
+}
+
+//добавляем информацию к юзерам
+$constructor = new ConstructorProfiles;
+try {
+    $file = new ImportData('profiles', ['address', 'bd', 'about', 'phone', 'skype']);
+    $file->import();
+    $file->upload($constructor);
+    print('Файл profiles.sql успешно записан'.PHP_EOL);
+}
+catch (BadFileExeption $e) {
+    print ('Не удалось импортировать файл: ' . $e->getMessage());
+}
+
+
